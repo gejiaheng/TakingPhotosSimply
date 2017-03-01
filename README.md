@@ -22,7 +22,7 @@ This is a demo of Android training [Taking Photos Simply](https://developer.andr
  
 ## License
 
-    Copyright 2017 gejiaheng
+    Copyright 2017 Jiaheng Ge
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
