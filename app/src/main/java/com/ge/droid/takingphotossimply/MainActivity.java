@@ -1,5 +1,6 @@
 package com.ge.droid.takingphotossimply;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -15,10 +16,15 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.tbruyelle.rxpermissions2.RxPermissions;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -54,24 +60,50 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         mCurrentPhotoPath = null;
-        switch (v.getId()) {
-            // get a thumbnail
-            case R.id.test1:
-                dispatchTakePictureIntentTest1();
-                break;
-            // save the image file to private storage
-            case R.id.test2:
-                dispatchTakePictureIntentTest2();
-                break;
-            // save the image file to public storage and add it to gallery
-            case R.id.test3:
-                dispatchTakePictureIntentTest3();
-                break;
-            // save the image file to public storage and compress it
-            case R.id.test4:
-                dispatchTakePictureIntentTest4();
-                break;
+        final int viewId = v.getId();
+        if (viewId == R.id.test2 || viewId == R.id.test3 || viewId == R.id.test4) {
+            RxPermissions rxPermissions = new RxPermissions(this);
+            rxPermissions.request(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    .subscribe(new Observer<Boolean>() {
+                        @Override
+                        public void onSubscribe(Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(Boolean aBoolean) {
+                            if (aBoolean) {
+                                switch (viewId) {
+                                    case R.id.test2:
+                                        dispatchTakePictureIntentTest2();
+                                        break;
+                                    case R.id.test3:
+                                        dispatchTakePictureIntentTest3();
+                                        break;
+                                    case R.id.test4:
+                                        dispatchTakePictureIntentTest4();
+                                        break;
+                                }
+                            } else {
+                                Toast.makeText(MainActivity.this, R.string.permission_denied,
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+        } else if (viewId == R.id.test1) {
+            dispatchTakePictureIntentTest1();
         }
+
     }
 
     @Override
@@ -100,6 +132,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private String mCurrentPhotoPath;
 
+    // get a thumbnail
     private void dispatchTakePictureIntentTest1() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
@@ -107,6 +140,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    // save the image file to private storage
     private void dispatchTakePictureIntentTest2() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
@@ -129,6 +163,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    // save the image file to public storage and add it to gallery
     private void dispatchTakePictureIntentTest3() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
@@ -152,6 +187,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    // save the image file to public storage and compress it
     private void dispatchTakePictureIntentTest4() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
